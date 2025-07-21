@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CamCookie on Roblox</title>
+  <style>
+    /* Reset & base */
+    * { margin: 0; padding: 0; box-sizing: border-box }
+    body { font-family: system-ui, sans-serif; color: #222; background: #f9f9f9; }
+    a { color: inherit; text-decoration: none }
+
+    /* Hero */
+    .hero { position: relative; height: 100vh; display: flex;
+      align-items: center; justify-content: center; background: #fff; overflow: hidden }
+    .hero-content { position: relative; text-align: center; max-width: 600px; z-index: 2 }
+    .hero h1 { font-size: 3rem; margin-bottom: 1rem }
+    .hero p { font-size: 1.2rem; margin-bottom: 2rem }
+    .code-block { display: inline-block; background: #2d2d2d; color: #f8f8f2;
+      padding: 1rem; border-radius: 6px; font-family: 'Courier New', monospace;
+      margin-bottom: 2rem; white-space: pre-wrap; text-align: left }
+    .cursor { display: inline-block; animation: blink 1s step-start infinite }
+    @keyframes blink { 50% { opacity: 0 } }
+    .cta { background: #0366d6; color: #fff; border: none;
+      padding: 0.8rem 1.4rem; font-size: 1rem; border-radius: 6px;
+      display: inline-flex; align-items: center; cursor: pointer;
+      transition: background 0.2s }
+    .cta:hover { background: #0356b6 }
+    .cta svg { margin-left: 0.5rem }
+
+    /* Canvas */
+    #hero-canvas { position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%; }
+
+    /* Game bar */
+    .game-bar { background: #fff; padding: 1rem 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1) }
+    .game-bar-inner { max-width: 1000px; margin: auto;
+      display: flex; align-items: center }
+    .scroll-btn { background: none; border: none;
+      cursor: pointer; padding: 0.5rem; color: #555;
+      transition: color 0.2s }
+    .scroll-btn:hover { color: #000 }
+    .games { display: flex; overflow-x: auto;
+      list-style: none; gap: 1rem; margin: 0 1rem }
+    .games li { min-width: 150px; flex-shrink: 0;
+      background: #f0f0f0; border-radius: 6px;
+      overflow: hidden; transition: transform 0.2s,
+      box-shadow 0.2s }
+    .games li:hover { transform: translateY(-4px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1) }
+    .games img { width: 100%; display: block }
+    .games .title { padding: 0.5rem; font-size: 0.9rem;
+      text-align: center }
+
+    /* Preview grid */
+    .preview { max-width: 1000px; margin: 3rem auto;
+      padding: 0 1rem }
+    .preview-grid { display: grid;
+      grid-template-columns: repeat(auto-fill,
+      minmax(220px,1fr)); gap: 1.5rem }
+    .preview-card { background: #fff;
+      border-radius: 6px; overflow: hidden;
+      transition: transform 0.2s; cursor: pointer }
+    .preview-card:hover { transform: translateY(-4px) }
+    .preview-card img { width: 100%; display: block }
+    .preview-card .info { padding: 0.8rem }
+    .preview-card .info h3 { font-size: 1rem }
+
+    /* Footer */
+    .site-footer { text-align: center; padding: 2rem 0;
+      font-size: 0.9rem; color: #666 }
+  </style>
+</head>
+<body>
+
+  <header class="hero">
+    <div class="hero-content">
+      <h1>CamCookie is Now on Roblox</h1>
+      <p>Explore cozy zones, seasonal skins, and kid-friendly creativity.</p>
+      <pre class="code-block"><code id="typewriter"></code><span class="cursor">|</span></pre>
+      <button class="cta" onclick="scrollToGames()">
+        Discover Worlds
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+             fill="none" stroke="currentColor" stroke-width="2"
+             viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+    <canvas id="hero-canvas"></canvas>
+  </header>
+
+  <nav class="game-bar">
+    <div class="game-bar-inner">
+      <button class="scroll-btn prev" aria-label="Scroll left">
+        <svg viewBox="0 0 24 24" width="24" height="24"
+             fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+      <ul id="game-list" class="games"></ul>
+      <button class="scroll-btn next" aria-label="Scroll right">
+        <svg viewBox="0 0 24 24" width="24" height="24"
+             fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 6l6 6-6 6"/>
+        </svg>
+      </button>
+    </div>
+  </nav>
+
+  <main>
+    <section class="preview">
+      <h2>World Previews</h2>
+      <div id="preview-grid" class="preview-grid"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    Built for accessibility and modular creativity.
+  </footer>
+
+  <script>
+    // placeholder game data
+    const games = [
+      { id:'123456', title:'Cozy Zone', thumb:'thumb1.jpg', preview:'preview1.jpg' },
+      { id:'234567', title:'Skin Showcase', thumb:'thumb2.jpg', preview:'preview2.jpg' },
+      { id:'345678', title:'Build Playground', thumb:'thumb3.jpg', preview:'preview3.jpg' }
+    ];
+
+    // typewriter
+    const codeLines = [
+      "const camCookie = new Roblox.World('CamCookie');",
+      "camCookie.loadZone('CozyZone');",
+      "camCookie.applySkin('Autumn');",
+      "camCookie.join();"
+    ];
+    let li=0, ci=0;
+    const typer = document.getElementById('typewriter');
+    function type() {
+      if(li>=codeLines.length) {
+        li=ci=0; typer.textContent=''; return setTimeout(type,800);
+      }
+      const line = codeLines[li];
+      if(ci<line.length) {
+        typer.textContent += line.charAt(ci++);
+        setTimeout(type,80);
+      } else {
+        typer.textContent += '\n'; ci=0; li++;
+        setTimeout(type,600);
+      }
+    }
+    document.addEventListener('DOMContentLoaded', type);
+
+    // populate game bar
+    const gameListEl = document.getElementById('game-list');
+    games.forEach(g => {
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <a href="https://www.roblox.com/games/${g.id}" target="_blank">
+          <img src="${g.thumb}"
+               onerror="this.onerror=null;
+                        this.src='data:image/svg+xml;charset=UTF-8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 24 24&quot;><rect width=&quot;24&quot; height=&quot;24&quot; fill=&quot;%23eee&quot;/><text x=&quot;12&quot; y=&quot;16&quot; font-size=&quot;10&quot; text-anchor=&quot;middle&quot; fill=&quot;%23aaa&quot;>No Image</text></svg>'"
+               alt="${g.title}">
+          <div class="title">${g.title}</div>
+        </a>`;
+      gameListEl.append(li);
+    });
+    document.querySelector('.prev')
+      .onclick = () => gameListEl.scrollBy({left:-200,behavior:'smooth'});
+    document.querySelector('.next')
+      .onclick = () => gameListEl.scrollBy({left:200,behavior:'smooth'});
+
+    // populate previews
+    const previewGrid = document.getElementById('preview-grid');
+    games.forEach(g => {
+      const card = document.createElement('div');
+      card.className = 'preview-card';
+      card.innerHTML = `
+        <a href="https://www.roblox.com/games/${g.id}" target="_blank">
+          <img src="${g.preview}"
+               onerror="this.onerror=null;
+                        this.outerHTML='<svg width=&quot;100%&quot; height=&quot;100%&quot; viewBox=&quot;0 0 24 24&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;><rect width=&quot;24&quot; height=&quot;24&quot; fill=&quot;%23eee&quot;/><text x=&quot;12&quot; y=&quot;16&quot; font-size=&quot;10&quot; text-anchor=&quot;middle&quot; fill=&quot;%23aaa&quot;>No Image</text></svg>'"
+               alt="${g.title}">
+          <div class="info"><h3>${g.title}</h3></div>
+        </a>`;
+      previewGrid.append(card);
+    });
+
+    // scroll to games
+    function scrollToGames() {
+      document.querySelector('.game-bar').scrollIntoView({behavior:'smooth'});
+    }
+
+    // canvas particles
+    const canvas = document.getElementById('hero-canvas');
+    const ctx = canvas.getContext('2d');
+    let parts = [], count=80;
+    function resize() {
+      canvas.width = innerWidth;
+      canvas.height = innerHeight;
+      parts = Array.from({length:count},()=>{
+        return {x:Math.random()*canvas.width,
+                y:Math.random()*canvas.height,
+                vx:(Math.random()-0.5)*0.3,
+                vy:(Math.random()-0.5)*0.3,
+                r:1+Math.random()*2}
+      });
+    }
+    function anim() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.fillStyle='rgba(3,102,214,0.2)';
+      parts.forEach(p=>{
+        p.x+=p.vx; p.y+=p.vy;
+        if(p.x<0||p.x>canvas.width)p.vx*=-1;
+        if(p.y<0||p.y>canvas.height)p.vy*=-1;
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.r,0,2*Math.PI);
+        ctx.fill();
+      });
+      requestAnimationFrame(anim);
+    }
+    window.addEventListener('resize',resize);
+    resize(); anim();
+  </script>
+</body>
+</html>
